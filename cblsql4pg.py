@@ -1,4 +1,5 @@
 import psycopg2
+import argparse
 
 # Function to connect to the PostgreSQL database
 def connect_to_db(db_name, user, password, host='localhost', port='5432'):
@@ -39,13 +40,13 @@ def get_table_columns(conn, table_name):
 
 # Function to generate the .cpy file for a table
 def generate_cpy_file(table_name, columns):
-    cpy_content = f"""*> -------------------------------------------
+    cpy_content = f"""      *> -------------------------------------------
       *> DECLARE TABLE for {table_name}
       *> -------------------------------------------
        EXEC SQL DECLARE {table_name} TABLE
        (\n"""
 
-    cobol_host_variables = f"""*> -------------------------------------------
+    cobol_host_variables = f"""      *> -------------------------------------------
       *> COBOL HOST VARIABLES FOR TABLE {table_name}
       *> -------------------------------------------
        01  DCL{table_name}.
@@ -116,27 +117,24 @@ def generate_cpy_file(table_name, columns):
 
         # Add the comma only if it is not the first column.
         if first_column:
-            cpy_content += f"     {col_name:<20} {col_type_with_length:<20} {not_null}\n"
+            cpy_content += f"           {col_name:<20} {col_type_with_length:<20} {not_null}\n"
             first_column = False
         else:
-            cpy_content += f"   , {col_name:<20} {col_type_with_length:<20} {not_null}\n"
+            cpy_content += f"         , {col_name:<20} {col_type_with_length:<20} {not_null}\n"
         
-        cobol_host_variables += f"    03 {table_name}-{col_name:<20} {cobol_type}\n"
-        cobol_indicator_variables += f"    03 {table_name}-{col_name}-NULL pic s9(04) comp-5.\n"
+        cobol_host_variables += f"           03 {table_name}-{col_name:<20} {cobol_type}\n"
+        cobol_indicator_variables += f"           03 {table_name}-{col_name}-NULL pic s9(04) comp-5.\n"
 
-    cpy_content += "   ) END-EXEC.\n"
+    cpy_content += "       ) END-EXEC.\n"
     cpy_content += cobol_host_variables
     cpy_content += cobol_indicator_variables
-    cpy_content += "*>----- End of file\n"
+    cpy_content += "      *>----- End of file\n"
 
     return cpy_content
 
 # Main function
-def main():
-    db_name = "MyDatabase"  # Replace with the name of your database
-    user = "myUser"  # Replace with your username
-    password = "myPassword"  # Replace with your password
-    conn = connect_to_db(db_name, user, password, host)
+def main(db_name, user, password, host='localhost', port='5432'):
+    conn = connect_to_db(db_name, user, password, host, port)
     if conn:
         tables = get_tables(conn)
         for table in tables:
@@ -147,4 +145,14 @@ def main():
         conn.close()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Generate COBOL declarations from PostgreSQL database tables.')
+    parser.add_argument('-d', '--database', required=True, help='Database name')
+    parser.add_argument('-u', '--user', required=True, help='Database user')
+    parser.add_argument('-p', '--password', required=True, help='Database password')
+    parser.add_argument('-H', '--host', default='localhost', help='Database host')
+    parser.add_argument('-P', '--port', default='5432', help='Database port')
+
+    args = parser.parse_args()
+
+    main(args.database, args.user, args.password, args.host, args.port)
+ 
