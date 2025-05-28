@@ -34,3 +34,19 @@ where mytable1.cpy is for example:
            03 mytable1-libelleen-NULL pic s9(04) comp-5.
         *>----- End of file
 
+Here is the syntax:
+
+    usage: cblsql4pg.py [-h] -d DATABASE -u USER -p PASSWORD [-H HOST] [-P PORT]
+    
+    Generate COBOL declarations from PostgreSQL database tables.
+    options:
+      -h, --help            show this help message and exit
+      -d DATABASE, --database DATABASE
+                            Database name
+      -u USER, --user USER  Database user
+      -p PASSWORD, --password PASSWORD
+                            Database password
+      -H HOST, --host HOST  Database host
+      -P PORT, --port PORT  Database port
+
+
