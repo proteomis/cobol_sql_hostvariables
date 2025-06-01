@@ -1,17 +1,20 @@
 For those who find it tedious to manually generate the SQL table declarations, COBOL host variables, and COBOL indicator variables required to use embedded SQL for COBOL, here is a small Python script that does the job, at least the basics.
-The script is designed for Postgresql databases.
-It connects to a database, retrieves the list of tables, and for each table, it creates a cpy file containing the declarations.
-All that remains is to specify the file in the WSS.
+The script is designed for PostgreSQL databases.  
+It connects to a database, retrieves the list of tables, and for each table, it creates a cpy file containing the declarations.  
+All that remains is to specify the file in the `working-storage section`.
 
+```cobol
         working-storage section.
         exec sql begin declare section end-exec.
-          copy "mytable1.cpy".
-          copy "mytable2.cpy".
-          copy "sqlca.cpy".
+        exec sql include "mytable1.cpy" end-exec.
+        exec sql include "mytable2.cpy" end-exec.
+        exec sql include "sqlca.cpy" end-exec.
         exec sql end declare section end-exec.
+```
 
 where mytable1.cpy is for example:
 
+```cobol
         *> -------------------------------------------
         *> DECLARE TABLE for mytable1.
         *> -------------------------------------------
@@ -33,6 +36,7 @@ where mytable1.cpy is for example:
            03 mytable1-code-NULL pic s9(04) comp-5.
            03 mytable1-libelleen-NULL pic s9(04) comp-5.
         *>----- End of file
+```
 
 Here is the syntax:
 
